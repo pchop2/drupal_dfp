@@ -674,18 +674,33 @@ function _dfp_js_global_settings() {
     'weight' => -10,
     'force header' => TRUE,
   );
-  drupal_add_js($js, $options);
+  //drupal_add_js($js, $options);
 
   // Include a script tag for the Google Tag Services.
   // @todo: One day this should include an async=true attribute. See #1140356.
   //        However, there is a good chance this might break <= IE8.
-  $options['type'] = 'external';
   $options['weight']++;
-  drupal_add_js(($GLOBALS['is_https'] ? "https://" : "http://") . DFP_GOOGLE_TAG_SERVICES_URL, $options);
+  $gpt = "var googletag = googletag || {};
+  googletag.cmd = googletag.cmd || [];
+  (function() {
+    var gads = document.createElement('script');
+    gads.async = true;
+    gads.type = 'text/javascript';
+    var useSSL = 'https:' == document.location.protocol;
+    gads.src = (useSSL ? 'https:' : 'http:') +
+      '//www.googletagservices.com/tag/js/gpt.js';
+    var node = document.getElementsByTagName('script')[0];
+    node.parentNode.insertBefore(gads, node);
+  })();";
+  drupal_add_js($gpt, $options);
 
   // Add global settings with a heavy weight so that they appear after all the
   // defineSlot() calls otherwise IE8 and Opera fail to display ads properly.
   $js = 'googletag.cmd.push(function() {' . "\n";
+
+    $js .= '  googletag.defineSlot("/8798/TestGPT", [300, 250], "dfp-ad-test")
+  .addService(googletag.pubads())
+  .setTargeting("pos", "top");' . "\n";
   if (variable_get('dfp_async_rendering', 1)) {
     $js .= '  googletag.pubads().enableAsyncRendering();' . "\n";
   }
@@ -716,10 +731,10 @@ function _dfp_js_global_settings() {
       $js .= '  googletag.pubads().setTargeting(' . $target['target'] . ', ' . $target['value'] . ');' . "\n";
     }
   }
-
+  $js .= '  googletag.enableServices();' . "\n";
   $js .= '});' . "\n";
   $js .= variable_get('dfp_injected_js2', '') . "\n";
-  $js .= 'googletag.enableServices();';
+  
 
   $options = array(
     'type' => 'inline',
@@ -798,7 +813,7 @@ function _dfp_js_slot_definition($tag) {
     'weight' => 0,
     'force header' => TRUE,
   );
-  drupal_add_js($js, $options);
+  //drupal_add_js($js, $options);
 }
 
 /**
