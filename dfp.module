@@ -675,7 +675,7 @@ function _dfp_js_global_settings() {
   $js = variable_get('dfp_injected_js', '') . "\n";
 
   // Add a place to store the slot name variable.
-  $js .= "  var slots = new Array();\n";
+  $js .= "  var dfp_slots = new Array();\n";
 
   // Add vendor code to include third party gpt.js file.
   $js .= "  var googletag = googletag || {};
@@ -696,8 +696,8 @@ function _dfp_js_global_settings() {
   $js = 'googletag.cmd.push(function() {' . "\n";
 
   // Cycles through available ad slots in the array, executes them.
-  $js .= '  for (slot in slots) {' . "\n";
-  $js .= '    slots[slot]();' . "\n";
+  $js .= '  for (slot in dfp_slots) {' . "\n";
+  $js .= '    dfp_slots[slot]();' . "\n";
   $js .= '  };' . "\n";
 
   // Async / Sync loading of ads
@@ -782,7 +782,7 @@ function _dfp_js_slot_definition($tag) {
   }
 
   // Encapsulate code into an entry in the slots array.
-  $js .= 'slots["' . $tag->machinename . '"] = function() { ';
+  $js .= 'dfp_slots["' . $tag->machinename . '"] = function() { ';
 
   // Is this ad an out of page institial?
   if (!empty($tag->settings['out_of_page'])) {
