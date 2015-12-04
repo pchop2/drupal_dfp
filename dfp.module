@@ -772,7 +772,7 @@ function _dfp_js_slot_definition($tag) {
   }
 
   $js .= 'googletag.slots["' . $tag->machinename . '"] = ';
-  //$js .= '\'';
+  $js .= '\'';
 
   if (!empty($tag->settings['out_of_page'])) {
     $js .= 'googletag.defineOutOfPageSlot("' . $tag->adunit . '", "' . $tag->placeholder_id . '")';
@@ -815,7 +815,7 @@ function _dfp_js_slot_definition($tag) {
 
   $js = rtrim($js, "\n") . ';';
 
-  //$js .= '\';';
+  $js .= '\';';
 
   $options = array(
     'type' => 'inline',
