@@ -808,7 +808,7 @@ function _dfp_js_slot_definition($tag) {
 
   // Set channel type if explicitly defined.
   if (!empty($tag->adsense_channel_ids)) {
-    $js .= '.set("adsense_channel_ids", "' . $tag->adsense_channel_ids . '")'
+    $js .= '.set("adsense_channel_ids", "' . $tag->adsense_channel_ids . '")';
   }
 
   // Set styling for the ad.
