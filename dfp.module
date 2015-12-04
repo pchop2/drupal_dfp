@@ -659,14 +659,6 @@ function _dfp_get_ad_category($term, $clean_string = FALSE) {
  * slot definitions.
  */
 function _dfp_js_global_settings() {
-  // Initialize the google varibales and inject user-defined javascript.
-  $js = 'var googletag = googletag || {};' . "\n";
-  $js .= 'googletag.cmd = googletag.cmd || [];';
-  $js .= variable_get('dfp_injected_js', '') . "\n";
-
-  // Add a place to store the slot name variable
-  $js .= 'googletag.slots = googletag.slots || {};';
-
   $options = array(
     'type' => 'inline',
     'group' => JS_LIBRARY,
@@ -674,14 +666,17 @@ function _dfp_js_global_settings() {
     'weight' => -10,
     'force header' => TRUE,
   );
-  //drupal_add_js($js, $options);
 
   // Include a script tag for the Google Tag Services.
   // @todo: One day this should include an async=true attribute. See #1140356.
   //        However, there is a good chance this might break <= IE8.
-  $options['weight']++;
-  $gpt = "var googletag = googletag || {};
+
+  // Initialize the google varibales and inject user-defined javascript.
+  $js = variable_get('dfp_injected_js', '') . "\n";
+  // Add a place to store the slot name variable
+  $js .= "  var googletag = googletag || {};
   googletag.cmd = googletag.cmd || [];
+  googletag.slots = googletag.slots || {};
   (function() {
     var gads = document.createElement('script');
     gads.async = true;
@@ -692,15 +687,20 @@ function _dfp_js_global_settings() {
     var node = document.getElementsByTagName('script')[0];
     node.parentNode.insertBefore(gads, node);
   })();";
-  drupal_add_js($gpt, $options);
+  drupal_add_js($js, $options);
 
   // Add global settings with a heavy weight so that they appear after all the
   // defineSlot() calls otherwise IE8 and Opera fail to display ads properly.
   $js = 'googletag.cmd.push(function() {' . "\n";
 
-    $js .= '  googletag.defineSlot("/8798/TestGPT", [300, 250], "dfp-ad-test")
-  .addService(googletag.pubads())
-  .setTargeting("pos", "top");' . "\n";
+  //$js .= '  googletag.defineSlot("/8798/TestGPT", [300, 250], "dfp-ad-test").setTargeting("pos", "top").addService(googletag.pubads());' . "\n";
+
+  $js .= '  for (slot in googletag.slots) {' . "\n";
+  $js .= '    eval(googletag.slots[slot]);' . "\n";
+  $js .= '  };' . "\n";
+
+  
+
   if (variable_get('dfp_async_rendering', 1)) {
     $js .= '  googletag.pubads().enableAsyncRendering();' . "\n";
   }
@@ -759,6 +759,8 @@ function _dfp_js_slot_definition($tag) {
 
   // Add the js needed to define this adSlot to <head>.
   $js = '';
+
+
   // Start by defining breakpoints for this ad.
   if (!empty($tag->breakpoints)) {
     $breakpoints = $tag->breakpoints;
@@ -768,11 +770,15 @@ function _dfp_js_slot_definition($tag) {
     }
     $js .= '  .build();' . "\n";
   }
+
+  $js .= 'googletag.slots["' . $tag->machinename . '"] = ';
+  //$js .= '\'';
+
   if (!empty($tag->settings['out_of_page'])) {
-    $js .= 'googletag.slots["' . $tag->machinename . '"] = googletag.defineOutOfPageSlot("' . $tag->adunit . '", "' . $tag->placeholder_id . '")' . "\n";
+    $js .= 'googletag.defineOutOfPageSlot("' . $tag->adunit . '", "' . $tag->placeholder_id . '")';
   }
   else {
-    $js .= 'googletag.slots["' . $tag->machinename . '"] = googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
+    $js .= 'googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")';
   }
   $click_url = variable_get('dfp_click_url', '');
   if (!empty($click_url)) {
@@ -780,32 +786,36 @@ function _dfp_js_slot_definition($tag) {
       // relative URL; prepend site domain
       $click_url = (($GLOBALS['is_https']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . "/" . $click_url;
     }
-    $js .= '  .setClickUrl("' . $click_url . '")' . "\n";
+    $js .= '.setClickUrl("' . $click_url . '")';
   }
-  $js .= '  .addService(googletag.pubads())' . "\n";
+  
 
   if (!empty($tag->adsense_ad_types)) {
-    $js .= '  .set("adsense_ad_types", "' . $tag->adsense_ad_types . '")' . "\n";
+    $js .= '.set("adsense_ad_types", "' . $tag->adsense_ad_types . '")';
   }
   if (!empty($tag->adsense_channel_ids)) {
-    $js .= '  .set("adsense_channel_ids", "' . $tag->adsense_channel_ids . '")' . "\n";
+    $js .= '.set("adsense_channel_ids", "' . $tag->adsense_channel_ids . '")' . "\n";
   }
   foreach ($tag->adsense_colors as $key => $val) {
     if (!empty($val)) {
       $key = 'adsense_' . $key . '_color';
       $val = '#' . drupal_strtoupper($val);
-      $js .= '  .set("' . $key . '", "' . $val . '")' . "\n";
+      $js .= '  .set("' . $key . '", "' . $val . '")';
     }
   }
   $targeting = dfp_format_targeting($tag->targeting, $tag);
   foreach ($targeting as $target) {
-    $js .= '  .setTargeting(' . $target['target'] . ', ' . $target['value'] . ')' . "\n";
+    $js .= '.setTargeting(' . $target['target'] . ', ' . $target['value'] . ')';
   }
   // Apply size mapping when there are breakpoints.
   if (!empty($tag->breakpoints)) {
-    $js .= '  .defineSizeMapping(mapping)' . "\n";
+    $js .= '  .defineSizeMapping(mapping)';
   }
+  $js .= '.addService(googletag.pubads())';
+
   $js = rtrim($js, "\n") . ';';
+
+  //$js .= '\';';
 
   $options = array(
     'type' => 'inline',
@@ -813,7 +823,7 @@ function _dfp_js_slot_definition($tag) {
     'weight' => 0,
     'force header' => TRUE,
   );
-  //drupal_add_js($js, $options);
+  drupal_add_js($js, $options);
 }
 
 /**
