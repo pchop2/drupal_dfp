@@ -749,6 +749,7 @@ function _dfp_js_global_settings() {
   $options = array(
     'type' => 'inline',
     'group' => JS_DEFAULT,
+    'defer' => TRUE,
     'every_page' => TRUE,
     'weight' => 10,
     'force header' => TRUE,
