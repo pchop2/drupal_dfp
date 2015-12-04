@@ -673,13 +673,15 @@ function _dfp_js_global_settings() {
 
   // Initialize the google varibales and inject user-defined javascript.
   $js = variable_get('dfp_injected_js', '') . "\n";
-  // Add a place to store the slot name variable
+
+  // Add a place to store the slot name variable.
+  $js .= "  var slots = new Array();\n";
+
+  // Add vendor code to include third party gpt.js file.
   $js .= "  var googletag = googletag || {};
   googletag.cmd = googletag.cmd || [];
-  googletag.slots = googletag.slots || {};
   (function() {
     var gads = document.createElement('script');
-    gads.async = true;
     gads.type = 'text/javascript';
     var useSSL = 'https:' == document.location.protocol;
     gads.src = (useSSL ? 'https:' : 'http:') +
@@ -695,8 +697,9 @@ function _dfp_js_global_settings() {
 
   //$js .= '  googletag.defineSlot("/8798/TestGPT", [300, 250], "dfp-ad-test").setTargeting("pos", "top").addService(googletag.pubads());' . "\n";
 
-  $js .= '  for (slot in googletag.slots) {' . "\n";
-  $js .= '    eval(googletag.slots[slot]);' . "\n";
+  $js .= '  for (slot in slots) {' . "\n";
+  $js .= '    console.log(slot);' . "\n";
+  $js .= '    slots[slot]();' . "\n";
   $js .= '  };' . "\n";
 
   
@@ -771,8 +774,8 @@ function _dfp_js_slot_definition($tag) {
     $js .= '  .build();' . "\n";
   }
 
-  $js .= 'googletag.slots["' . $tag->machinename . '"] = ';
-  $js .= '\'';
+  // Encapsulate code into an entry in the slots array.
+  $js .= 'slots["' . $tag->machinename . '"] = function() { ';
 
   if (!empty($tag->settings['out_of_page'])) {
     $js .= 'googletag.defineOutOfPageSlot("' . $tag->adunit . '", "' . $tag->placeholder_id . '")';
@@ -815,7 +818,8 @@ function _dfp_js_slot_definition($tag) {
 
   $js = rtrim($js, "\n") . ';';
 
-  $js .= '\';';
+  // Close the function declaration.
+  $js .= ' }';
 
   $options = array(
     'type' => 'inline',
