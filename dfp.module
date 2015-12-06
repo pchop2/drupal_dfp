@@ -771,6 +771,9 @@ function _dfp_js_slot_definition($tag) {
   // Add the js needed to define this adSlot to <head>.
   $js = '';
 
+  // Encapsulate code into an entry in the slots array.
+  $js .= 'dfp_slots["' . $tag->machinename . '"] = function() { ';
+
   // Start by defining breakpoints for this ad.
   if (!empty($tag->breakpoints)) {
     $breakpoints = $tag->breakpoints;
@@ -780,9 +783,6 @@ function _dfp_js_slot_definition($tag) {
     }
     $js .= '.build();' . "\n";
   }
-
-  // Encapsulate code into an entry in the slots array.
-  $js .= 'dfp_slots["' . $tag->machinename . '"] = function() { ';
 
   // Is this ad an out of page institial?
   if (!empty($tag->settings['out_of_page'])) {
