@@ -97,6 +97,14 @@ function dfp_tag_form(&$form, &$form_state) {
     '#parents' => array('settings', 'out_of_page'),
     '#weight' => 0,
   );
+  $form['tag_settings']['companion'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Is this a companion ad?'),
+    '#description' => t('Only if you have a video player that sends out VAST specifications for synchronized ads.'),
+    '#default_value' => isset($tag->settings['companion']) ? $tag->settings['companion'] : 0,
+    '#parents' => array('settings', 'companion'),
+    '#weight' => 0,
+  );
   $form['tag_settings']['size'] = array(
     '#type' => 'textfield',
     '#title' => t('Size(s)'),

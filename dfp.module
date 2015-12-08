@@ -759,6 +759,10 @@ function _dfp_js_slot_definition($tag) {
   else {
     $js .= 'googletag.slots["' . $tag->machinename . '"] = googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
   }
+  // Add companion ads method to ad if page has VAST video player implementation.
+  if (!empty($tag->settings['companion'])) {
+    $js.= '  .addService(googletag.companionAds())' . "\n";
+  }
   $click_url = variable_get('dfp_click_url', '');
   if (!empty($click_url)) {
     if (!preg_match("/^https?:\/\//", $click_url)) {
