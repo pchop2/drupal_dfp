@@ -677,6 +677,9 @@ function _dfp_js_global_settings() {
   // Add a place to store the slot name variable.
   $js .= "  var dfp_slots = new Array();\n";
 
+  // VAST flag.  Default to false if none exist.
+  $js .= "  var dfp_enable_vast = false;\n";
+
   // Add vendor code to include third party gpt.js file.
   $js .= "  var googletag = googletag || {};
   googletag.cmd = googletag.cmd || [];
@@ -738,6 +741,11 @@ function _dfp_js_global_settings() {
     }
   }
 
+  // Enable refill of unfilled slots if VAST is in play.
+  $js .= '  if (dfp_enable_vast) {' . "\n";
+  $js .= '    googletag.companionAds().setRefreshUnfilledSlots(true);' . "\n";
+  $js .= '  }' . "\n";
+
   // Activate service.
   $js .= '  googletag.enableServices();' . "\n";
   $js .= '});' . "\n";
@@ -792,6 +800,11 @@ function _dfp_js_slot_definition($tag) {
     $js .= 'googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")';
   }
 
+  // Add companion ads method to ad if page has VAST video player implementation.
+  if (!empty($tag->settings['companion'])) {
+    $js.= '  .addService(googletag.companionAds())' . "\n";
+  }
+
   // Set DFP Click URL (sync mode only).
   $click_url = variable_get('dfp_click_url', '');
   if (!empty($click_url)) {
@@ -837,6 +850,11 @@ function _dfp_js_slot_definition($tag) {
 
   // Clean up.
   $js = rtrim($js, "\n") . ';';
+
+  // Switch flag to signify that VAST companion ads are in play.
+  if (!empty($tag->settings['companion'])) {
+    $js.= '  dfp_enable_vast = true;' . "\n";
+  }
 
   // Close the function declaration.
   $js .= ' }';
