@@ -797,7 +797,7 @@ function _dfp_js_slot_definition($tag) {
     $js .= 'googletag.defineOutOfPageSlot("' . $tag->adunit . '", "' . $tag->placeholder_id . '")';
   }
   else {
-    $js .= 'googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")';
+    $js .= 'googletag.defineSlot("' . $tag->adunit . $tag->ad_hierarchy . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")';
   }
 
   // Add companion ads method to ad if page has VAST video player implementation.
