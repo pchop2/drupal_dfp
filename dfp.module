@@ -675,7 +675,10 @@ function _dfp_js_global_settings() {
   $js = variable_get('dfp_injected_js', '') . "\n";
 
   // Add a place to store the slot name variable.
+  // This stores the function to add to cmd push...
   $js .= "  var dfp_slots = new Array();\n";
+  // Stores the googletag object for refreshing...
+  $js .= "  var dfp_entry = new Array();\n";
 
   // VAST flag.  Default to false if none exist.
   $js .= "  var dfp_enable_vast = false;\n";
@@ -792,6 +795,7 @@ function _dfp_js_slot_definition($tag) {
     $js .= '.build();' . "\n";
   }
 
+  $js .= 'dfp_entry["' . $tag->machinename . '"] = ';
   // Is this ad an out of page institial?
   if (!empty($tag->settings['out_of_page'])) {
     $js .= 'googletag.defineOutOfPageSlot("' . $tag->adunit . '", "' . $tag->placeholder_id . '")';
