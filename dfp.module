@@ -798,7 +798,7 @@ function _dfp_js_slot_definition($tag) {
   $js .= 'dfp_entry["' . $tag->machinename . '"] = ';
   // Is this ad an out of page institial?
   if (!empty($tag->settings['out_of_page'])) {
-    $js .= 'googletag.defineOutOfPageSlot("' . $tag->adunit . '", "' . $tag->placeholder_id . '")';
+    $js .= 'googletag.defineOutOfPageSlot("' . $tag->adunit . $tag->ad_hierarchy . '", "' . $tag->placeholder_id . '")';
   }
   else {
     $js .= 'googletag.defineSlot("' . $tag->adunit . $tag->ad_hierarchy . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")';
