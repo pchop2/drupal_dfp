@@ -23,9 +23,13 @@ $plugin = array(
 function dfp_dfp_pane_render($subtype, $conf, $panel_args, $context) {
   $content = array();
 
-  foreach ($conf['dfp_ads'] as $key => $ad) {
-    if (!empty($ad)) {
-      $content[$key] = dfp_tag($ad);
+  // If you're authenticated, hide the ads.  We don't want them displayed for staff members.
+  // TODO: Figure out a way to defer loading panels_ipe.js.  That was identified as the sole script that was hiding the ads.
+  if (!empty(user_roles(TRUE))) {
+    foreach ($conf['dfp_ads'] as $key => $ad) {
+      if (!empty($ad)) {
+        $content[$key] = dfp_tag($ad);
+      }
     }
   }
 
