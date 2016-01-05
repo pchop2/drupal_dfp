@@ -105,6 +105,14 @@ function dfp_tag_form(&$form, &$form_state) {
     '#parents' => array('settings', 'companion'),
     '#weight' => 0,
   );
+  $form['tag_settings']['disable_initial_load'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Disable initial load?'),
+    '#description' => t('Do not load on page load?.'),
+    '#default_value' => isset($tag->settings['disable_initial_load']) ? $tag->settings['companion'] : 0,
+    '#parents' => array('settings', 'disable_initial_load'),
+    '#weight' => 0,
+  );
   $form['tag_settings']['size'] = array(
     '#type' => 'textfield',
     '#title' => t('Size(s)'),

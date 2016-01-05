@@ -10,15 +10,14 @@
     print drupal_render($slug);
   endif; ?>
   <script type="text/javascript">
+    <?php if (!empty($tag->disable_initial_load)): ?>
+      // MIA
+    <?php else: ?>
     $(document).ready(function() {
       googletag.cmd.push(function() {
         googletag.display("<?php print $tag->placeholder_id ?>");
-        <?php // TODO: First, move this forked module into the repo. ?>
-        <?php // TODO: Second, the second parameter here could be less tacky.... ?>
-        <?php if (variable_get('dfp_disable_init_load', 0) && $tag->machinename != 'block_gallery'): ?>
-  googletag.pubads().refresh([dfp_entry.<?php print $tag->machinename; ?>]);
-        <?php endif; ?>
       });
     });
+    <?php endif; ?>
   </script>
 </div>
