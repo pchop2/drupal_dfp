@@ -13,7 +13,7 @@
     <?php if (!empty($tag->disable_initial_load)): ?>
       // MIA
     <?php else: ?>
-    $(document).ready(function() {
+    jQuery(document).ready(function($) {
       googletag.cmd.push(function() {
         googletag.display("<?php print $tag->placeholder_id ?>");
       });
